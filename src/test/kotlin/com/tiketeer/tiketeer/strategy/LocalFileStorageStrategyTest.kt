@@ -27,8 +27,7 @@ class LocalFileStorageStrategyTest {
     }
 
     @Test
-    @DisplayName("임시파일 다수 > 로컬에 저장 > 파일 존재 확인")
-    fun uploadFileSuccess() {
+    fun `임시파일 다수 - 로컬에 저장 - 파일 존재 확인`() {
         //given
         val mockFile: MockMultipartFile = MockMultipartFile(
                 "file",
@@ -53,7 +52,7 @@ class LocalFileStorageStrategyTest {
     }
 
     @Test
-    fun retrieveFileSuccess() {
+    fun `임시파일 생성 - 파일 요청 - 파일 전달`() {
         //given
         val mockFile: MockMultipartFile = MockMultipartFile(
             "file",
