@@ -40,5 +40,5 @@ out/
 .kotlin
 
 ### files ###
-files/
+/files/
 src/main/resources/application*
