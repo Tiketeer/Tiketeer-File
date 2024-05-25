@@ -1,12 +1,13 @@
 package com.tiketeer.tiketeer.strategy
 
 import com.tiketeer.tiketeer.StorageFile
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import java.io.File
 
 
 interface FileStorageStrategy {
-    fun uploadFiles(files: List<StorageFile>): List<String>
-
-    fun uploadFile(file: StorageFile): String
-
-    fun retrieveFile(fileId: String): StorageFile
+    fun uploadFile(file: StorageFile): Mono<String>
+    fun uploadFiles(files: List<StorageFile>): Flux<String>
+    fun retrieveFile(fileId: String): Mono<ByteArray>
 }

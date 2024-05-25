@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: test
+  application:
+    name: TiketeerFile
+
+
+custom:
+  policy:
+    storage: local
+    local-storage-path: storageTest

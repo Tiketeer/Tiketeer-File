@@ -1,0 +1,17 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: TiketeerFile
+
+custom:
+  policy:
+    storage: local
+    local-storage-path: files
+
+
+logging:
+  level:
+    org:
+      springframework:
+        cache: TRACE

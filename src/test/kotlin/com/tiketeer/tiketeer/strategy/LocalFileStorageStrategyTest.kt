@@ -1,15 +1,17 @@
 package com.tiketeer.tiketeer.strategy
 
 import com.tiketeer.tiketeer.StorageFile
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.mock.web.MockMultipartFile
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -35,19 +37,20 @@ class LocalFileStorageStrategyTest {
                 "image/png",
                 "test".toByteArray())
 
-        //when
-        val file: StorageFile = StorageFile(
-                fileName = mockFile.name,
-                fileData = mockFile.bytes
-        )
+        // When
+        val filePart = MockFilePart(mockFile)
+        val filePathFlux: Flux<String> = storageStrategy.uploadFiles(listOf(StorageFile(filePart)))
 
-        val filePath: List<String> = storageStrategy.uploadFiles(listOf(file))
-
-        //then
-        val savedFileName = Paths.get(filePath.first())
-        val savedFilePath = tempDir.resolve(savedFileName)
-        assertThat(Files.exists(savedFilePath)).isTrue()
-        assertThat(String(Files.readAllBytes(savedFilePath))).isEqualTo("test")
+        // Then
+        StepVerifier.create(filePathFlux.collectList())
+            .assertNext { filePathList ->
+                assertThat(filePathList).hasSize(1)
+                val savedFileName = Paths.get(filePathList.first()).fileName
+                val savedFilePath = tempDir.resolve(savedFileName)
+                assertThat(Files.exists(savedFilePath)).isTrue()
+                assertThat(String(Files.readAllBytes(savedFilePath))).isEqualTo("test")
+            }
+            .verifyComplete()
 
     }
 
@@ -58,13 +61,17 @@ class LocalFileStorageStrategyTest {
             "file",
             "testfile.png",
             "image/png",
-            "test".toByteArray())
+            "test".toByteArray()
+        )
 
         //when
         mockFile.transferTo(tempDir.resolve(mockFile.name).toFile())
-        val retrievedFile = storageStrategy.retrieveFile(mockFile.name)
-
-        assertThat(retrievedFile.fileData).isEqualTo(mockFile.bytes)
+        val retrievedFileMono: Mono<ByteArray> = storageStrategy.retrieveFile(mockFile.name)
+        StepVerifier.create(retrievedFileMono)
+            .assertNext { retrievedFileData ->
+                assertThat(retrievedFileData).isEqualTo(mockFile.bytes)
+            }
+            .verifyComplete()
 
 
     }

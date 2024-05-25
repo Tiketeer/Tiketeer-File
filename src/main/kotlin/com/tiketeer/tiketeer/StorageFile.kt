@@ -1,7 +1,9 @@
 package com.tiketeer.tiketeer
 
+import org.springframework.http.codec.multipart.FilePart
 import java.util.*
 
-class StorageFile constructor(fileName: String, val fileData: ByteArray) {
-    val fileName: String = UUID.randomUUID().toString() + "_" + fileName
+
+class StorageFile(val file: FilePart) {
+    val fileName = "${UUID.randomUUID()}_${file.filename()}"
 }

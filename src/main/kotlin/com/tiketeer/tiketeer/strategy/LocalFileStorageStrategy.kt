@@ -3,15 +3,18 @@ package com.tiketeer.tiketeer.strategy
 import com.tiketeer.tiketeer.StorageFile
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.io.FileSystemResource
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
+
 private val logger = KotlinLogging.logger {}
 
-
-class LocalFileStorageStrategy(private val localStoragePath: String) : FileStorageStrategy{
+class LocalFileStorageStrategy(private val localStoragePath: String) : FileStorageStrategy {
 
     private val absolutePath: Path
 
@@ -33,33 +36,41 @@ class LocalFileStorageStrategy(private val localStoragePath: String) : FileStora
         return storagePath
     }
 
-    override fun retrieveFile(fileId: String): StorageFile {
-        try{
+
+    override fun retrieveFile(fileId: String): Mono<ByteArray> {
+        return Mono.fromCallable {
             val filePath = absolutePath.resolve(fileId)
-            return StorageFile(
-                    fileName = fileId,
-                    fileData = Files.readAllBytes(filePath)
-            )
-        } catch(e: IOException) {
-            logger.error {"Failed to retrieve file $fileId at $absolutePath"}
-            throw RuntimeException("File retrieval failed")
-        }
+            Files.readAllBytes(filePath)
+        }.subscribeOn(Schedulers.boundedElastic())
+            .doOnError {
+                logger.error { "Failed to retrieve file $fileId at $absolutePath" }
+                throw RuntimeException("File retrieval failed")
+            }
     }
 
-    override fun uploadFile(file: StorageFile): String {
-        try {
-            val fileName: String = file.fileName
-            val destinationPath = absolutePath.resolve(fileName)
-            Files.write(destinationPath, file.fileData)
-            logger.debug {"Uploaded file $fileName at $destinationPath"}
-            return fileName
-        } catch(e: IOException) {
-            logger.error { "Failed to store file at $absolutePath" }
-            throw RuntimeException("File upload failed")
-        }
+
+    override fun uploadFile(file: StorageFile): Mono<String> {
+        val fileName = file.fileName
+        println("filename: $fileName")
+        val destinationPath = absolutePath.resolve(fileName)
+
+        return file.file.transferTo(destinationPath)
+            .then(Mono.fromCallable {
+                logger.debug { "Uploaded file $fileName at $destinationPath" }
+                fileName
+            })
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnError { e ->
+                logger.error { "Failed to store file at $absolutePath: ${e.message}" }
+                throw RuntimeException("File upload failed", e)
+            }
     }
 
-    override fun uploadFiles(files: List<StorageFile>): List<String> {
-        return files.map { uploadFile(it) }
+
+    override fun uploadFiles(files: List<StorageFile>): Flux<String> {
+        return Flux.fromIterable(files)
+            .flatMap { file ->
+                uploadFile(file).thenReturn(file.fileName)
+            }
     }
 }
