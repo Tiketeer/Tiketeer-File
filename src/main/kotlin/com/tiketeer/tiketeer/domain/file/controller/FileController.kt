@@ -1,4 +1,4 @@
-package com.tiketeer.Tiketeer.infra.storage
+package com.tiketeer.tiketeer.domain.file.controller
 
 import com.tiketeer.tiketeer.StorageFile
 import com.tiketeer.tiketeer.strategy.FileStorageStrategy
