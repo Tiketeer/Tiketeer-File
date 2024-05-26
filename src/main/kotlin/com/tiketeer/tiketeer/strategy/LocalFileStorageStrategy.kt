@@ -3,6 +3,9 @@ package com.tiketeer.tiketeer.strategy
 import com.tiketeer.tiketeer.StorageFile
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.io.FileSystemResource
+import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -37,11 +40,15 @@ class LocalFileStorageStrategy(private val localStoragePath: String) : FileStora
     }
 
 
-    override fun retrieveFile(fileId: String): Mono<ByteArray> {
-        return Mono.fromCallable {
-            val filePath = absolutePath.resolve(fileId)
-            Files.readAllBytes(filePath)
-        }.subscribeOn(Schedulers.boundedElastic())
+    override fun retrieveFile(fileId: String): Flux<DataBuffer> {
+        val filePath = absolutePath.resolve(fileId)
+        println("retrieveFile: $filePath")
+
+        return DataBufferUtils.read(
+            filePath,
+            DefaultDataBufferFactory(),
+            4096
+        ).subscribeOn(Schedulers.boundedElastic())
             .doOnError {
                 logger.error { "Failed to retrieve file $fileId at $absolutePath" }
                 throw RuntimeException("File retrieval failed")
@@ -51,7 +58,6 @@ class LocalFileStorageStrategy(private val localStoragePath: String) : FileStora
 
     override fun uploadFile(file: StorageFile): Mono<String> {
         val fileName = file.fileName
-        println("filename: $fileName")
         val destinationPath = absolutePath.resolve(fileName)
 
         return file.file.transferTo(destinationPath)

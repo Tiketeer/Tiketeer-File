@@ -3,7 +3,8 @@ spring:
     active: test
   application:
     name: TiketeerFile
-
+  main:
+    allow-bean-definition-overriding: true
 
 custom:
   policy:
