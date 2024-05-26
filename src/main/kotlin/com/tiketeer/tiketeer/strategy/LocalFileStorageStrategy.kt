@@ -42,7 +42,6 @@ class LocalFileStorageStrategy(private val localStoragePath: String) : FileStora
 
     override fun retrieveFile(fileId: String): Flux<DataBuffer> {
         val filePath = absolutePath.resolve(fileId)
-        println("retrieveFile: $filePath")
 
         return DataBufferUtils.read(
             filePath,
