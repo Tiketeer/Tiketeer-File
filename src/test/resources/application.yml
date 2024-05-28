@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    active: test
+  application:
+    name: TiketeerFile
+  main:
+    allow-bean-definition-overriding: true
+
+custom:
+  policy:
+    storage: local
+    local-storage-path: storageTest
+
+
+logging:
+  level:
+    ROOT: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.SQL_SLOW: INFO
+    org.hibernate.stat: TRACE
+    org.springframework.orm: TRACE
+    org.springframework.transaction: TRACE
+    org.springframework.cache: Trace
