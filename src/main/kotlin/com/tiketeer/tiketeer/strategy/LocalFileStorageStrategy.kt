@@ -54,16 +54,13 @@ class LocalFileStorageStrategy(private val localStoragePath: String) : FileStora
             }
     }
 
-
     override fun uploadFile(file: StorageFile): Mono<String> {
         val fileName = file.fileName
         val destinationPath = absolutePath.resolve(fileName)
 
         return file.file.transferTo(destinationPath)
-            .then(Mono.fromCallable {
-                logger.debug { "Uploaded file $fileName at $destinationPath" }
-                fileName
-            })
+            .thenReturn(fileName)
+            .doOnNext { logger.debug { "Uploaded file $fileName at $destinationPath" } }
             .subscribeOn(Schedulers.boundedElastic())
             .doOnError { e ->
                 logger.error { "Failed to store file at $absolutePath: ${e.message}" }
