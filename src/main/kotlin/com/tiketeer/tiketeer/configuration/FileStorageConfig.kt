@@ -1,8 +1,7 @@
 package com.tiketeer.tiketeer.configuration
 
 import com.tiketeer.tiketeer.constant.StorageEnum
-import com.tiketeer.tiketeer.strategy.FileStorageStrategy
-import com.tiketeer.tiketeer.strategy.LocalFileStorageStrategy
+import com.tiketeer.tiketeer.domain.file.strategy.LocalFileStorageStrategy
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

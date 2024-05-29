@@ -1,8 +1,8 @@
 package com.tiketeer.tiketeer.domain.file.controller
 
 import com.tiketeer.tiketeer.StorageFile
-import com.tiketeer.tiketeer.strategy.FileStorageStrategy
-import com.tiketeer.tiketeer.strategy.LocalFileStorageStrategy
+import com.tiketeer.tiketeer.domain.file.strategy.FileStorageStrategy
+import com.tiketeer.tiketeer.domain.file.strategy.LocalFileStorageStrategy
 import com.tiketeer.tiketeer.strategy.MockFilePart
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
