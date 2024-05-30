@@ -39,7 +39,7 @@ class LocalFileStorageStrategyTest {
 
         // When
         val filePart = MockFilePart(mockFile)
-        val filePathFlux: Flux<String> = storageStrategy.uploadFiles(listOf(StorageFile(filePart)))
+        val filePathFlux: Flux<String> = storageStrategy.uploadFiles(listOf(StorageFile(filePart, "testfile.png")))
 
         // Then
         StepVerifier.create(filePathFlux.collectList())

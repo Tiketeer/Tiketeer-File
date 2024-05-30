@@ -21,7 +21,7 @@ class UploadFileUseCase @Autowired constructor(
 
             val storageFile = StorageFile(
                 dto.file,
-                fileName = dto.fileName + "_" + dto.file.filename()
+                fileName = dto.fileName
             )
             fileStorageStrategy.uploadFile(storageFile)
                 .then()

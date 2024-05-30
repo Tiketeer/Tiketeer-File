@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 import javax.activation.MimetypesFileTypeMap
 
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/file")
 class FileController @Autowired constructor(
     private val fileStorageStrategy: FileStorageStrategy,
     private val uploadFileUseCase: UploadFileUseCase
