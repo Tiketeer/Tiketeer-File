@@ -53,7 +53,9 @@ class FileControllerTest {
     }
 
     @Test
-    fun uploadFile() {
+    fun `파일 업로드 시도 - 성공`() {
+
+        //given
         val sha256Mac: Mac = Mac.getInstance("HmacSHA256")
         val secretKeySpec = SecretKeySpec(secretKey.toByteArray(), "HmacSHA256")
         sha256Mac.init(secretKeySpec)
@@ -74,6 +76,7 @@ class FileControllerTest {
             part("dto", dtoJson, MediaType.APPLICATION_JSON)
         }.build()
 
+        //when - then
         webTestClient.post()
             .uri("/file")
             .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -83,8 +86,8 @@ class FileControllerTest {
     }
 
     @Test
-    fun getFile() {
-
+    fun `파일 이름 - 조회 시도 - 성공`() {
+        //given
         val image = MockMultipartFile(
             "file", "image.png", "image/png", "Image Content".toByteArray()
         )
@@ -93,9 +96,10 @@ class FileControllerTest {
         val storageFile = StorageFile(filePart, "image.png")
         val fileName = storageFile.fileName
         val filePath = tempDir.resolve(fileName)
+        //when
         Files.write(filePath, "Image Content".toByteArray(), StandardOpenOption.CREATE)
 
-
+        //then
         webTestClient.get()
             .uri("/file/$fileName")
             .exchange()
