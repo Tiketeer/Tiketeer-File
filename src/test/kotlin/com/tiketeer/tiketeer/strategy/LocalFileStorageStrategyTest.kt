@@ -1,6 +1,7 @@
 package com.tiketeer.tiketeer.strategy
 
 import com.tiketeer.tiketeer.StorageFile
+import com.tiketeer.tiketeer.domain.file.strategy.LocalFileStorageStrategy
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,7 +39,7 @@ class LocalFileStorageStrategyTest {
 
         // When
         val filePart = MockFilePart(mockFile)
-        val filePathFlux: Flux<String> = storageStrategy.uploadFiles(listOf(StorageFile(filePart)))
+        val filePathFlux: Flux<String> = storageStrategy.uploadFiles(listOf(StorageFile(filePart, "testfile.png")))
 
         // Then
         StepVerifier.create(filePathFlux.collectList())

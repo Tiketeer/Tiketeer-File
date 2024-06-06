@@ -1,4 +1,4 @@
-package com.tiketeer.tiketeer.strategy
+package com.tiketeer.tiketeer.domain.file.strategy
 
 import com.tiketeer.tiketeer.StorageFile
 import org.springframework.core.io.buffer.DataBuffer

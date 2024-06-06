@@ -1,7 +1,9 @@
 package com.tiketeer.tiketeer.domain.file.controller
 
-import com.tiketeer.tiketeer.StorageFile
-import com.tiketeer.tiketeer.strategy.FileStorageStrategy
+import com.tiketeer.tiketeer.domain.file.dto.UploadFileCommandDto
+import com.tiketeer.tiketeer.domain.file.dto.UploadFileRequestDto
+import com.tiketeer.tiketeer.domain.file.strategy.FileStorageStrategy
+import com.tiketeer.tiketeer.domain.file.usecase.UploadFileUseCase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpHeaders
@@ -14,15 +16,25 @@ import reactor.core.publisher.Mono
 import javax.activation.MimetypesFileTypeMap
 
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/file")
 class FileController @Autowired constructor(
-    private val fileStorageStrategy: FileStorageStrategy
+    private val fileStorageStrategy: FileStorageStrategy,
+    private val uploadFileUseCase: UploadFileUseCase
 ) {
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun uploadFile(@RequestPart("file") file: Mono<FilePart>): Mono<ResponseEntity<Void>> {
-        return file.flatMap { filePart ->
-            fileStorageStrategy.uploadFile(StorageFile(filePart))
+    fun uploadFile(
+        @RequestPart("file") fileMono: Mono<FilePart>,
+        @RequestPart("dto") dtoMono: Mono<UploadFileRequestDto>
+    ): Mono<ResponseEntity<Void>> {
+        return fileMono.zipWith(dtoMono) { file, dto ->
+            UploadFileCommandDto(
+                fileName = dto.fileName,
+                signature = dto.signature,
+                file = file
+            )
+        }.flatMap { commandDto ->
+            uploadFileUseCase.uploadFile(commandDto)
         }.then(Mono.just(ResponseEntity.ok().build()))
     }
 
@@ -38,4 +50,6 @@ class FileController @Autowired constructor(
                 .body(fileStorageStrategy.retrieveFile(fileId))
         )
     }
+
+
 }

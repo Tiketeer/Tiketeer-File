@@ -1,4 +1,4 @@
-package com.tiketeer.tiketeer.strategy
+package com.tiketeer.tiketeer.domain.file.strategy
 
 import com.tiketeer.tiketeer.StorageFile
 import io.github.oshai.kotlinlogging.KotlinLogging
