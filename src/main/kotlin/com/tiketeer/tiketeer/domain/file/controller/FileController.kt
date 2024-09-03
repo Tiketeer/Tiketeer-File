@@ -2,7 +2,8 @@ package com.tiketeer.tiketeer.domain.file.controller
 
 import com.tiketeer.tiketeer.domain.file.dto.UploadFileCommandDto
 import com.tiketeer.tiketeer.domain.file.dto.UploadFileRequestDto
-import com.tiketeer.tiketeer.domain.file.strategy.FileStorageStrategy
+import com.tiketeer.tiketeer.domain.file.strategy.FileUploadStrategy
+import com.tiketeer.tiketeer.domain.file.usecase.LocalFileRetrieveUseCase
 import com.tiketeer.tiketeer.domain.file.usecase.UploadFileUseCase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.buffer.DataBuffer
@@ -18,7 +19,7 @@ import javax.activation.MimetypesFileTypeMap
 @RestController
 @RequestMapping("/file")
 class FileController @Autowired constructor(
-    private val fileStorageStrategy: FileStorageStrategy,
+    private val localFileRetrieveUseCase: LocalFileRetrieveUseCase,
     private val uploadFileUseCase: UploadFileUseCase
 ) {
 
@@ -26,28 +27,30 @@ class FileController @Autowired constructor(
     fun uploadFile(
         @RequestPart("file") fileMono: Mono<FilePart>,
         @RequestPart("dto") dtoMono: Mono<UploadFileRequestDto>
-    ): Mono<ResponseEntity<Void>> {
+    ): Mono<ResponseEntity<String>> {
         return fileMono.zipWith(dtoMono) { file, dto ->
             UploadFileCommandDto(
                 fileName = dto.fileName,
-                signature = dto.signature,
                 file = file
             )
         }.flatMap { commandDto ->
             uploadFileUseCase.uploadFile(commandDto)
-        }.then(Mono.just(ResponseEntity.ok().build()))
+        }.map { fileUrl ->
+            ResponseEntity.ok(fileUrl)
+        }
     }
 
-    @GetMapping("/{fileId}")
-    fun getFile(@PathVariable fileId: String): Mono<ResponseEntity<Flux<DataBuffer>>> {
+
+    @GetMapping("/local/{fileName}")
+    fun getLocalFile(@PathVariable fileName: String): Mono<ResponseEntity<Flux<DataBuffer>>> {
         val fileTypeMap = MimetypesFileTypeMap()
-        val mimeType = fileTypeMap.getContentType(fileId)
+        val mimeType = fileTypeMap.getContentType(fileName)
 
         return Mono.just(
             ResponseEntity.ok()
                 .contentType(MediaType.valueOf(mimeType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileId\"")
-                .body(fileStorageStrategy.retrieveFile(fileId))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
+                .body(localFileRetrieveUseCase.retrieveFile(fileName))
         )
     }
 

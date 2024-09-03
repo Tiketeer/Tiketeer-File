@@ -29,6 +29,11 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation("com.sun.activation:jakarta.activation:1.2.2")
 
+
+	// AWS
+	implementation platform('software.amazon.awssdk:bom:2.17.230')
+	implementation 'software.amazon.awssdk:s3'
+
 	//Test
 	testImplementation "org.mockito.kotlin:mockito-kotlin:5.3.1"
 

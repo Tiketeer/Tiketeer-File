@@ -6,8 +6,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 
-interface FileStorageStrategy {
+interface FileUploadStrategy {
     fun uploadFile(file: StorageFile): Mono<String>
     fun uploadFiles(files: List<StorageFile>): Flux<String>
-    fun retrieveFile(fileId: String): Flux<DataBuffer>
 }
